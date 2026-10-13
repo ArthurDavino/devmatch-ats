@@ -1,5 +1,34 @@
 # DevMatch ATS
 
+Aplicação web que compara um currículo com a descrição de uma vaga de tecnologia, mostra o percentual de match, aponta as palavras-chave técnicas que faltam e gera uma versão do currículo otimizada para passar por sistemas de ATS — sem nunca inventar experiência que a pessoa não tem.
+
+**Aplicação publicada:** https://devmatch-ats.lovable.app
+
+## O problema que resolve
+
+Candidatos a vagas de tecnologia costumam ter currículos bons que nunca chegam ao RH, porque o **ATS (Applicant Tracking System)** — o software que ranqueia e filtra candidaturas automaticamente, antes de qualquer humano ler — descarta o currículo por falta de palavras-chave técnicas que aparecem na descrição da vaga (linguagens, frameworks, ferramentas, metodologias). O DevMatch ATS compara o currículo da pessoa com a vaga, mostra exatamente o que está faltando e gera uma versão ajustada, otimizada para passar pelo ATS.
+
+Uma regra vale para a aplicação inteira: ela melhora como a pessoa se apresenta e **nunca inventa experiência** que a pessoa não tem. Esse compromisso fica visível na própria interface (rodapé da Home e aviso fixo na tela de resultado).
+
+## Como a análise funciona
+
+1. A pessoa cola a descrição da vaga e o próprio currículo em dois campos de texto;
+2. A aplicação extrai candidatos a palavras-chave técnicas da vaga (linguagens, frameworks, bibliotecas, bancos de dados, ferramentas de cloud/DevOps, metodologias, certificações e senioridade) a partir de uma lista local com cerca de 110 termos técnicos e suas variações mais comuns (ex: "JS"/"JavaScript", "Postgres"/"PostgreSQL", "React.js"/"ReactJS"/"React" contam como a mesma palavra-chave);
+3. Verifica quais desses termos aparecem no currículo e calcula o percentual de match — termos que aparecem na seção de requisitos obrigatórios da vaga pesam mais no cálculo;
+4. Agrupa as palavras-chave encontradas e as que faltam por categoria (Linguagens, Frameworks e bibliotecas, Bancos de dados, Cloud e DevOps, Metodologias, Outras habilidades);
+5. Gera a versão ajustada do currículo reorganizando e destacando o que a pessoa já tem — expandindo siglas que ela já usou (ex: "JS" vira "JavaScript (JS)") e adicionando uma seção de competências técnicas com os termos que já estavam no texto original. As palavras-chave que faltam aparecem só como sugestão, separadas do currículo, nunca inseridas nele como se fossem experiência real;
+6. A pessoa pode copiar o texto ajustado ou exportar em PDF.
+
+Nesta primeira versão a extração de palavras-chave e a reescrita do currículo rodam inteiramente no navegador, com a lista local de termos — sem chamar um modelo de linguagem. O código já está estruturado para trocar essa lógica por uma chamada a uma IA depois, sem precisar redesenhar as telas.
+
+## O mega prompt usado
+
+O projeto inteiro foi gerado a partir de um único mega prompt em Markdown, escrito antes de abrir o Lovable e colado de uma vez só no modo **Build**. Ele descreve o problema, a regra de nunca inventar experiência, a especialização em vagas de tecnologia, o fluxo das 3 telas, os componentes do shadcn/ui a usar, a paleta de cores (azul petróleo `#0B4F6C` + verde `#10B981`, pensada para transmitir profissionalismo e aprovação), a lógica da análise e os requisitos técnicos. Ele não foi reescrito depois — a primeira geração já saiu com as três telas funcionando; os ajustes que vieram depois foram pedidos por cima do resultado gerado (ver seção abaixo), não editando o prompt original.
+
+<details>
+<summary>Ver o mega prompt completo</summary>
+
+```markdown
 Crie uma aplicação web chamada DevMatch ATS.
 
 ## 1. Problema que resolve
@@ -96,26 +125,34 @@ Se a aplicação usar um modelo de linguagem para a extração de palavras-chave
 ## 9. Fora de escopo nesta v1 (não implementar agora)
 
 Exportar em .docx, histórico de análises em banco de dados, login com confirmação por e-mail, dashboard de evolução entre versões e otimização de SEO/GEO ficam para uma fase posterior de evolução do projeto — não implementar nesta primeira geração.
+```
 
-This project was built with [Lovable](https://lovable.dev).
+</details>
 
-**Live app**: https://devmatch-ats.lovable.app
+## Ajustes feitos depois da primeira geração
 
-## Build with Lovable
+A primeira geração no Lovable já saiu com as três telas funcionando e passou no teste manual (vaga + currículo de exemplo, 55% de match, palavras-chave corretas, currículo ajustado respeitando a regra). Ao testar o link publicado, dois problemas apareceram e foram corrigidos com dois pedidos de ajuste, por cima do resultado gerado:
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/8baccc3a-541c-4c96-b122-c7f3c0063632).
+1. **Botão da Home não navegava** — "Analisar meu currículo" só dava scroll até a seção de "como funciona" em vez de abrir a tela `/analisar`. Pedido: corrigir para navegar de verdade. Causa: a Home ainda não tinha sido publicada com a versão corrigida quando o teste foi feito a primeira vez — o link publicado estava desatualizado em relação ao código.
+2. **Faltava o rodapé com o aviso da regra na Home** — o aviso "o DevMatch ATS nunca inventa experiência..." só aparecia na tela de resultado, não na Home, como o mega prompt pedia. Pedido: adicionar o mesmo aviso fixo no rodapé da Home.
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+Depois da correção, o arquivo alterado foi só `src/routes/index.tsx` (a página inicial): o rodapé passou a ficar embutido diretamente nela, em vez de vir de um componente compartilhado só com a tela de resultado, e o botão passou a linkar direto para `/analisar`. O projeto foi publicado de novo para o link ao vivo refletir as duas correções.
 
-## Development
+## Stack
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+- React + TanStack Start, TypeScript, Tailwind CSS, shadcn/ui
+- Geração de PDF no cliente
+- Sem backend, banco de dados ou autenticação nesta versão — toda a análise roda na sessão do navegador
 
-```sh
-git clone <this-repository-url>
-cd <repository-name>
+## Rodando localmente
+
+```bash
+git clone https://github.com/ArthurDavino/devmatch-ats.git
+cd devmatch-ats
 npm i
 npm run dev
 ```
+
+---
+
+Projeto construído com [Lovable](https://lovable.dev) a partir do mega prompt acima, como parte de um desafio de projeto sobre construir aplicações com IA generativa.
