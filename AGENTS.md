@@ -8,3 +8,4 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+- ATS analysis lives in src/lib/ats (local dictionary matching, v1); screens depend only on the AnalysisResult type so the engine can be swapped for an AI server function later.
