@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, ClipboardPaste, FileText, Gauge } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { SiteFooter } from "@/components/RuleNotice";
+import { RULE_TEXT } from "@/components/RuleNotice";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -35,7 +35,7 @@ function Index() {
             Descubra o que falta e ajuste em minutos.
           </p>
           <Button asChild size="lg" className="mt-8">
-            <Link to="/analisar">
+            <Link to="/analisar" data-testid="cta-analisar">
               Analisar meu currículo <ArrowRight />
             </Link>
           </Button>
@@ -55,7 +55,9 @@ function Index() {
           ))}
         </section>
       </main>
-      <SiteFooter />
+      <footer className="border-t border-border bg-card py-8" data-testid="home-rule-footer">
+        <p className="mx-auto max-w-3xl px-6 text-center text-sm text-muted-foreground">{RULE_TEXT}</p>
+      </footer>
     </div>
   );
 }
