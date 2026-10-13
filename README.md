@@ -144,6 +144,19 @@ Depois da correção, o arquivo alterado foi só `src/routes/index.tsx` (a pági
 - Geração de PDF no cliente
 - Sem backend, banco de dados ou autenticação nesta versão — toda a análise roda na sessão do navegador
 
+## Segurança
+
+O que já é garantido por como a v1 foi construída:
+- **Sem backend, banco de dados ou autenticação**: toda a análise roda no navegador, dentro da sessão da pessoa. A vaga e o currículo colados nunca saem do navegador nem são salvos em lugar nenhum.
+- **Sem chaves de API, tokens ou segredos no código** — nesta versão não existe nenhuma chamada a serviço externo que exigisse isso; o match é 100% calculado localmente.
+- **Sem risco de XSS a partir do texto colado**: o React renderiza a vaga, o currículo e o resultado sempre como texto puro, nunca via `dangerouslySetInnerHTML`. A única ocorrência disso no projeto é no componente de gráfico do shadcn/ui (não usado nesta v1), que injeta só CSS fixo de tema — nunca dado digitado pela pessoa.
+- **Exportação em PDF 100% no cliente**: o currículo ajustado nunca é enviado para um servidor para virar PDF.
+
+Pontos de atenção para quem for evoluir o projeto:
+- O domínio de publicação (`*.lovable.app`) tem analytics básico de visitantes ativado por padrão — vale revisar ou desativar se o projeto crescer.
+- Se uma versão futura adicionar IA generativa (como o mega prompt já prevê na seção 7), a chave do provedor deve ficar só no backend (edge function do Lovable), nunca no frontend.
+- Nesta v1 não há login nem dado de usuário persistido para proteger — isso muda assim que histórico ou autenticação forem adicionados, fora do escopo atual.
+
 ## Capturas de tela
 
 **Home** — proposta e os 3 passos do fluxo:
