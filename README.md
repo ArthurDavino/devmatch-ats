@@ -152,6 +152,11 @@ O que já é garantido por como a v1 foi construída:
 - **Sem risco de XSS a partir do texto colado**: o React renderiza a vaga, o currículo e o resultado sempre como texto puro, nunca via `dangerouslySetInnerHTML`. A única ocorrência disso no projeto é no componente de gráfico do shadcn/ui (não usado nesta v1), que injeta só CSS fixo de tema — nunca dado digitado pela pessoa.
 - **Exportação em PDF 100% no cliente**: o currículo ajustado nunca é enviado para um servidor para virar PDF.
 
+Reforços de segurança aplicados depois da primeira versão (confirmados direto nos cabeçalhos da resposta do site ao vivo):
+- **Cabeçalhos HTTP de segurança** em todas as respostas (`src/lib/security-headers.ts`): `Content-Security-Policy` restringindo scripts, estilos e fontes ao próprio domínio e ao Google Fonts, e bloqueando a página de ser exibida dentro de sites de terceiros via `frame-ancestors`; `X-Content-Type-Options: nosniff`; `Referrer-Policy: strict-origin-when-cross-origin`; `Permissions-Policy` desativando câmera, microfone e geolocalização (a aplicação não usa nenhum dos três).
+- **Limite de 20.000 caracteres** nos campos de vaga e currículo (`src/routes/analisar.tsx`), para evitar que um texto colado gigante trave a análise no navegador da pessoa.
+- Checagem de segurança automática da Lovable rodada depois dessas mudanças: nenhum problema encontrado.
+
 Pontos de atenção para quem for evoluir o projeto:
 - O domínio de publicação (`*.lovable.app`) tem analytics básico de visitantes ativado por padrão — vale revisar ou desativar se o projeto crescer.
 - Se uma versão futura adicionar IA generativa (como o mega prompt já prevê na seção 7), a chave do provedor deve ficar só no backend (edge function do Lovable), nunca no frontend.
