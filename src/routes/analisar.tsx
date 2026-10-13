@@ -28,6 +28,7 @@ export const Route = createFileRoute("/analisar")({
 });
 
 const MIN = 80;
+const MAX = 20000;
 
 function AnalyzePage() {
   const [job, setJob] = useState("");
@@ -93,9 +94,11 @@ function Field({ label, value, onChange, placeholder }: { label: string; value: 
   return (
     <div className="flex flex-col gap-2">
       <label htmlFor={id} className="text-sm font-semibold text-foreground">{label}</label>
-      <Textarea id={id} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder}
+      <Textarea id={id} value={value} maxLength={MAX} onChange={(e) => onChange(e.target.value.slice(0, MAX))} placeholder={placeholder}
         className="min-h-[320px] resize-y bg-card text-[15px] leading-relaxed lg:min-h-[420px]" />
-      <span className="self-end text-xs text-muted-foreground">{value.length.toLocaleString("pt-BR")} caracteres</span>
+      <span className={`self-end text-xs ${value.length >= MAX ? "text-warning" : "text-muted-foreground"}`}>
+        {value.length.toLocaleString("pt-BR")} / {MAX.toLocaleString("pt-BR")} caracteres
+      </span>
     </div>
   );
 }
