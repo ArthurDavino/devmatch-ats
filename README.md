@@ -144,6 +144,24 @@ Depois da correção, o arquivo alterado foi só `src/routes/index.tsx` (a pági
 - Geração de PDF no cliente
 - Sem backend, banco de dados ou autenticação nesta versão — toda a análise roda na sessão do navegador
 
+## Capturas de tela
+
+**Home** — proposta e os 3 passos do fluxo:
+
+![Home do DevMatch ATS](screenshots/home.jpg)
+
+**Resultado da análise** — percentual de match e o aviso de que a aplicação nunca inventa experiência:
+
+![Resultado da análise com percentual de match](screenshots/resultado-match.jpg)
+
+**Palavras-chave encontradas e que faltam**, agrupadas por categoria:
+
+![Palavras-chave agrupadas por categoria](screenshots/palavras-chave.jpg)
+
+**Currículo ajustado para ATS**, pronto para copiar ou exportar em PDF:
+
+![Currículo ajustado para ATS](screenshots/curriculo-ajustado.jpg)
+
 ## Rodando localmente
 
 ```bash
