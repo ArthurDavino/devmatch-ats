@@ -12,18 +12,20 @@ Uma regra vale para a aplicação inteira: ela melhora como a pessoa se apresent
 
 ## Como a análise funciona
 
-1. A pessoa cola a descrição da vaga e o próprio currículo em dois campos de texto;
+1. A pessoa cola a descrição da vaga em um campo de texto; no campo do currículo, pode colar o texto ou clicar em **Importar PDF** e subir o currículo antigo — o texto é extraído direto no navegador (com `pdfjs-dist`, sem o arquivo sair do navegador da pessoa) e preenche o campo automaticamente, podendo ser editado depois;
 2. A aplicação extrai candidatos a palavras-chave técnicas da vaga (linguagens, frameworks, bibliotecas, bancos de dados, ferramentas de cloud/DevOps, metodologias, certificações e senioridade) a partir de uma lista local com cerca de 110 termos técnicos e suas variações mais comuns (ex: "JS"/"JavaScript", "Postgres"/"PostgreSQL", "React.js"/"ReactJS"/"React" contam como a mesma palavra-chave);
 3. Verifica quais desses termos aparecem no currículo e calcula o percentual de match — termos que aparecem na seção de requisitos obrigatórios da vaga pesam mais no cálculo;
 4. Agrupa as palavras-chave encontradas e as que faltam por categoria (Linguagens, Frameworks e bibliotecas, Bancos de dados, Cloud e DevOps, Metodologias, Outras habilidades);
 5. Gera a versão ajustada do currículo reorganizando e destacando o que a pessoa já tem — expandindo siglas que ela já usou (ex: "JS" vira "JavaScript (JS)") e adicionando uma seção de competências técnicas com os termos que já estavam no texto original. As palavras-chave que faltam aparecem só como sugestão, separadas do currículo, nunca inseridas nele como se fossem experiência real;
 6. A pessoa pode copiar o texto ajustado ou exportar em PDF.
 
+Se o PDF importado não tiver texto extraível (por exemplo, for uma imagem escaneada), a aplicação avisa e pede para colar o texto manualmente. Textos muito longos (vaga, currículo colado ou extraído do PDF) são limitados a 20.000 caracteres.
+
 Nesta primeira versão a extração de palavras-chave e a reescrita do currículo rodam inteiramente no navegador, com a lista local de termos — sem chamar um modelo de linguagem. O código já está estruturado para trocar essa lógica por uma chamada a uma IA depois, sem precisar redesenhar as telas.
 
 ## O mega prompt usado
 
-O projeto inteiro foi gerado a partir de um único mega prompt em Markdown, escrito antes de abrir o Lovable e colado de uma vez só no modo **Build**. Ele descreve o problema, a regra de nunca inventar experiência, a especialização em vagas de tecnologia, o fluxo das 3 telas, os componentes do shadcn/ui a usar, a paleta de cores (azul petróleo `#0B4F6C` + verde `#10B981`, pensada para transmitir profissionalismo e aprovação), a lógica da análise e os requisitos técnicos. Ele não foi reescrito depois — a primeira geração já saiu com as três telas funcionando; os ajustes que vieram depois foram pedidos por cima do resultado gerado (ver seção abaixo), não editando o prompt original.
+O projeto inteiro foi gerado a partir de um único mega prompt em Markdown, escrito antes de abrir o Lovable e colado de uma vez só no modo **Build**. Ele descreve o problema, a regra de nunca inventar experiência, a especialização em vagas de tecnologia, o fluxo das 3 telas, os componentes do shadcn/ui a usar, a paleta de cores (azul petróleo `#0B4F6C` + verde `#10B981`, pensada para transmitir profissionalismo e aprovação), a lógica da análise e os requisitos técnicos. Ele não foi reescrito depois — a primeira geração já saiu com as três telas funcionando; os ajustes e evoluções que vieram depois foram pedidos por cima do resultado gerado (ver seções abaixo), não editando o prompt original.
 
 <details>
 <summary>Ver o mega prompt completo</summary>
@@ -129,32 +131,31 @@ Exportar em .docx, histórico de análises em banco de dados, login com confirma
 
 </details>
 
-## Ajustes feitos depois da primeira geração
+## Ajustes e evoluções feitas depois da primeira geração
 
-A primeira geração no Lovable já saiu com as três telas funcionando e passou no teste manual (vaga + currículo de exemplo, 55% de match, palavras-chave corretas, currículo ajustado respeitando a regra). Ao testar o link publicado, dois problemas apareceram e foram corrigidos com dois pedidos de ajuste, por cima do resultado gerado:
+A primeira geração no Lovable já saiu com as três telas funcionando e passou no teste manual (vaga + currículo de exemplo, 55% de match, palavras-chave corretas, currículo ajustado respeitando a regra). Depois disso, três rodadas de pedidos foram feitas por cima do resultado gerado:
 
-1. **Botão da Home não navegava** — "Analisar meu currículo" só dava scroll até a seção de "como funciona" em vez de abrir a tela `/analisar`. Pedido: corrigir para navegar de verdade. Causa: a Home ainda não tinha sido publicada com a versão corrigida quando o teste foi feito a primeira vez — o link publicado estava desatualizado em relação ao código.
-2. **Faltava o rodapé com o aviso da regra na Home** — o aviso "o DevMatch ATS nunca inventa experiência..." só aparecia na tela de resultado, não na Home, como o mega prompt pedia. Pedido: adicionar o mesmo aviso fixo no rodapé da Home.
-
-Depois da correção, o arquivo alterado foi só `src/routes/index.tsx` (a página inicial): o rodapé passou a ficar embutido diretamente nela, em vez de vir de um componente compartilhado só com a tela de resultado, e o botão passou a linkar direto para `/analisar`. O projeto foi publicado de novo para o link ao vivo refletir as duas correções.
+1. **Botão da Home não navegava** — "Analisar meu currículo" só dava scroll até a seção de "como funciona" em vez de abrir a tela `/analisar`. Corrigido: a Home ainda não tinha sido publicada com a versão corrigida quando o teste foi feito a primeira vez — o link publicado estava desatualizado em relação ao código.
+2. **Faltava o rodapé com o aviso da regra na Home** — o aviso "o DevMatch ATS nunca inventa experiência..." só aparecia na tela de resultado, não na Home, como o mega prompt pedia. Corrigido adicionando o mesmo aviso fixo no rodapé da Home (arquivo alterado: `src/routes/index.tsx`).
+3. **Importar currículo em PDF** — para não precisar digitar ou colar o texto manualmente, foi adicionado um botão "Importar PDF" ao lado do campo de currículo, que extrai o texto do PDF direto no navegador (sem subir o arquivo a lugar nenhum) e preenche o campo automaticamente.
 
 ## Stack
 
 - React + TanStack Start, TypeScript, Tailwind CSS, shadcn/ui
-- Geração de PDF no cliente
+- Leitura e geração de PDF no cliente: `pdfjs-dist` para importar o currículo antigo, `jspdf` para exportar o currículo ajustado
 - Sem backend, banco de dados ou autenticação nesta versão — toda a análise roda na sessão do navegador
 
 ## Segurança
 
 O que já é garantido por como a v1 foi construída:
-- **Sem backend, banco de dados ou autenticação**: toda a análise roda no navegador, dentro da sessão da pessoa. A vaga e o currículo colados nunca saem do navegador nem são salvos em lugar nenhum.
+- **Sem backend, banco de dados ou autenticação**: toda a análise roda no navegador, dentro da sessão da pessoa. A vaga e o currículo (colado ou importado de um PDF) nunca saem do navegador nem são salvos em lugar nenhum.
 - **Sem chaves de API, tokens ou segredos no código** — nesta versão não existe nenhuma chamada a serviço externo que exigisse isso; o match é 100% calculado localmente.
-- **Sem risco de XSS a partir do texto colado**: o React renderiza a vaga, o currículo e o resultado sempre como texto puro, nunca via `dangerouslySetInnerHTML`. A única ocorrência disso no projeto é no componente de gráfico do shadcn/ui (não usado nesta v1), que injeta só CSS fixo de tema — nunca dado digitado pela pessoa.
+- **Sem risco de XSS a partir do texto colado ou importado**: o React renderiza a vaga, o currículo e o resultado sempre como texto puro, nunca via `dangerouslySetInnerHTML`. A única ocorrência disso no projeto é no componente de gráfico do shadcn/ui (não usado nesta v1), que injeta só CSS fixo de tema — nunca dado digitado ou extraído de um PDF pela pessoa.
 - **Exportação em PDF 100% no cliente**: o currículo ajustado nunca é enviado para um servidor para virar PDF.
 
 Reforços de segurança aplicados depois da primeira versão (confirmados direto nos cabeçalhos da resposta do site ao vivo):
 - **Cabeçalhos HTTP de segurança** em todas as respostas (`src/lib/security-headers.ts`): `Content-Security-Policy` restringindo scripts, estilos e fontes ao próprio domínio e ao Google Fonts, e bloqueando a página de ser exibida dentro de sites de terceiros via `frame-ancestors`; `X-Content-Type-Options: nosniff`; `Referrer-Policy: strict-origin-when-cross-origin`; `Permissions-Policy` desativando câmera, microfone e geolocalização (a aplicação não usa nenhum dos três).
-- **Limite de 20.000 caracteres** nos campos de vaga e currículo (`src/routes/analisar.tsx`), para evitar que um texto colado gigante trave a análise no navegador da pessoa.
+- **Limite de 20.000 caracteres** nos campos de vaga e currículo (incluindo o texto extraído de um PDF importado), para evitar que um texto gigante trave a análise no navegador da pessoa.
 - Checagem de segurança automática da Lovable rodada depois dessas mudanças: nenhum problema encontrado.
 
 Pontos de atenção para quem for evoluir o projeto:
