@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
-import { Check, Copy, Download, Loader2, RotateCcw, ShieldCheck } from "lucide-react";
+import { useRef, useState } from "react";
+import { Check, Copy, Download, FileUp, Loader2, RotateCcw, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -73,6 +73,7 @@ function AnalyzePage() {
               <Field label="Descrição da vaga" value={job} onChange={setJob}
                 placeholder="Cole aqui o texto completo do anúncio da vaga: responsabilidades, requisitos, diferenciais…" />
               <Field label="Seu currículo" value={resume} onChange={setResume}
+                action={<PdfImportButton onText={setResume} />}
                 placeholder="Cole aqui o texto do seu currículo. Não precisa formatar — copie direto do PDF ou do documento." />
             </div>
             <div className="mt-6 flex flex-col items-start gap-2">
@@ -89,11 +90,60 @@ function AnalyzePage() {
   );
 }
 
-function Field({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (v: string) => void; placeholder: string }) {
+function PdfImportButton({ onText }: { onText: (t: string) => void }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+  const onFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
+      toast.error("Escolha um arquivo .pdf");
+      return;
+    }
+    setBusy(true);
+    try {
+      const { extractPdfText } = await import("@/lib/ats/pdf-import");
+      const text = await extractPdfText(file);
+      if (text.replace(/\s/g, "").length < 20) {
+        toast.error("Não encontramos texto nesse PDF", {
+          description: "Parece ser uma imagem escaneada. Cole o texto do currículo manualmente no campo.",
+        });
+        return;
+      }
+      if (text.length > MAX) {
+        onText(text.slice(0, MAX));
+        toast.warning("Currículo importado parcialmente", {
+          description: `O PDF tinha ${text.length.toLocaleString("pt-BR")} caracteres; mantivemos os primeiros ${MAX.toLocaleString("pt-BR")}.`,
+        });
+      } else {
+        onText(text);
+        toast.success("Currículo importado. Revise o texto antes de analisar.");
+      }
+    } catch {
+      toast.error("Não foi possível ler esse PDF", { description: "Tente outro arquivo ou cole o texto manualmente." });
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <>
+      <input ref={inputRef} type="file" accept=".pdf,application/pdf" className="hidden" onChange={onFile} aria-label="Arquivo PDF do currículo" />
+      <Button type="button" variant="outline" size="sm" disabled={busy} onClick={() => inputRef.current?.click()}>
+        {busy ? <Loader2 className="animate-spin" /> : <FileUp />} {busy ? "Lendo PDF…" : "Importar PDF"}
+      </Button>
+    </>
+  );
+}
+
+function Field({ label, value, onChange, placeholder, action }: { label: string; value: string; onChange: (v: string) => void; placeholder: string; action?: React.ReactNode }) {
   const id = label.replace(/\s/g, "-");
   return (
     <div className="flex flex-col gap-2">
-      <label htmlFor={id} className="text-sm font-semibold text-foreground">{label}</label>
+      <div className="flex min-h-9 items-center justify-between gap-2">
+        <label htmlFor={id} className="text-sm font-semibold text-foreground">{label}</label>
+        {action}
+      </div>
       <Textarea id={id} value={value} maxLength={MAX} onChange={(e) => onChange(e.target.value.slice(0, MAX))} placeholder={placeholder}
         className="min-h-[320px] resize-y bg-card text-[15px] leading-relaxed lg:min-h-[420px]" />
       <span className={`self-end text-xs ${value.length >= MAX ? "text-warning" : "text-muted-foreground"}`}>
