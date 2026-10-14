@@ -120,7 +120,8 @@ function PdfImportButton({ onText }: { onText: (t: string) => void }) {
         onText(text);
         toast.success("Currículo importado. Revise o texto antes de analisar.");
       }
-    } catch {
+    } catch (err) {
+      console.error("PDF import failed", err);
       toast.error("Não foi possível ler esse PDF", { description: "Tente outro arquivo ou cole o texto manualmente." });
     } finally {
       setBusy(false);
