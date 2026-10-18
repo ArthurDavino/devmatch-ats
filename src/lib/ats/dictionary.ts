@@ -237,7 +237,6 @@ export const DICTIONARY: KeywordDef[] = [
   // Automação e certificações
   { name: "PowerShell", category: A, aliases: ["powershell", "power shell", "pwsh"] },
   { name: "Scripts de automação", category: A, aliases: ["scripts de automação", "scripts de automacao", "scripts de automatização", "scripts de automatizacao", "automation scripts", "scripting"] },
-  { name: "Ansible", category: A, aliases: ["ansible"] },
   { name: "CompTIA", category: T, aliases: ["comptia", "comp tia", "comptia a+", "comptia network+", "comptia security+"] },
   { name: "ITIL", category: T, aliases: ["itil", "itil foundation", "information technology infrastructure library"] },
   { name: "CCNA", category: T, aliases: ["ccna", "cisco certified network associate"] },

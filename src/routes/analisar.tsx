@@ -22,6 +22,8 @@ export const Route = createFileRoute("/analisar")({
       { name: "description", content: "Cole a vaga e seu currículo para ver o percentual de match e as palavras-chave técnicas que faltam." },
       { property: "og:title", content: "Analisar currículo — DevMatch ATS" },
       { property: "og:description", content: "Match entre currículo e vaga de tecnologia, agrupado por categoria." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: AnalyzePage,
