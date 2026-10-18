@@ -55,7 +55,7 @@ export function decodeAscii85(input: Uint8Array): Uint8Array {
 
 async function inflateOk(data: Uint8Array): Promise<boolean> {
   try {
-    const stream = new Blob([data]).stream().pipeThrough(new DecompressionStream("deflate"));
+    const stream = new Response(data).body!.pipeThrough(new DecompressionStream("deflate"));
     await new Response(stream).arrayBuffer();
     return true;
   } catch {
