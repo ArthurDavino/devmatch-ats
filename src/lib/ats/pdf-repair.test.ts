@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, expect, it } from "vitest";
 import { deflateSync, inflateSync } from "node:zlib";
 import { decodeAscii85, repairPdfBytes } from "./pdf-repair";
