@@ -13,13 +13,13 @@ Uma regra vale para a aplicação inteira: ela melhora como a pessoa se apresent
 ## Como a análise funciona
 
 1. A pessoa cola a descrição da vaga em um campo de texto; no campo do currículo, pode colar o texto ou clicar em **Importar PDF** e subir o currículo antigo — o texto é extraído direto no navegador (com `pdfjs-dist`, sem o arquivo sair do navegador da pessoa) e preenche o campo automaticamente, podendo ser editado depois;
-2. A aplicação extrai candidatos a palavras-chave técnicas da vaga (linguagens, frameworks, bibliotecas, bancos de dados, ferramentas de cloud/DevOps, metodologias, certificações e senioridade) a partir de uma lista local com cerca de 110 termos técnicos e suas variações mais comuns (ex: "JS"/"JavaScript", "Postgres"/"PostgreSQL", "React.js"/"ReactJS"/"React" contam como a mesma palavra-chave);
+2. A aplicação extrai candidatos a palavras-chave técnicas da vaga a partir de uma lista local ampla, cobrindo não só desenvolvimento de software, mas tecnologia em geral: linguagens de programação, frameworks e bibliotecas, bancos de dados, cloud e DevOps (incluindo Azure, GCP, Kubernetes, Terraform), metodologias ágeis, suporte técnico e helpdesk, infraestrutura e redes (Active Directory, VPN, DNS, TCP/IP), produtividade e colaboração (Microsoft 365, Exchange, Teams, SharePoint), gestão de dispositivos (Intune, acesso remoto), segurança da informação (MFA, LGPD, ISO 27001), dados e BI (Power BI, DAX, ETL) e automação (PowerShell, Bash), com suas variações mais comuns (ex: "JS"/"JavaScript", "AD"/"Active Directory");
 3. Verifica quais desses termos aparecem no currículo e calcula o percentual de match — termos que aparecem na seção de requisitos obrigatórios da vaga pesam mais no cálculo;
-4. Agrupa as palavras-chave encontradas e as que faltam por categoria (Linguagens, Frameworks e bibliotecas, Bancos de dados, Cloud e DevOps, Metodologias, Outras habilidades);
+4. Agrupa as palavras-chave encontradas e as que faltam por categoria (Linguagens, Frameworks e bibliotecas, Bancos de dados, Cloud e DevOps, Metodologias, Suporte e Infraestrutura, Produtividade e Colaboração, Gestão de Dispositivos, Segurança da Informação, Dados e BI, Automação, Outras habilidades);
 5. Gera a versão ajustada do currículo reorganizando e destacando o que a pessoa já tem — expandindo siglas que ela já usou (ex: "JS" vira "JavaScript (JS)") e adicionando uma seção de competências técnicas com os termos que já estavam no texto original. As palavras-chave que faltam aparecem só como sugestão, separadas do currículo, nunca inseridas nele como se fossem experiência real;
 6. A pessoa pode copiar o texto ajustado ou exportar em PDF.
 
-Se o PDF importado não tiver texto extraível (por exemplo, for uma imagem escaneada), a aplicação avisa e pede para colar o texto manualmente. Textos muito longos (vaga, currículo colado ou extraído do PDF) são limitados a 20.000 caracteres.
+Se o PDF importado não tiver texto extraível (por exemplo, for uma imagem escaneada), a aplicação avisa e pede para colar o texto manualmente. Se o arquivo PDF tiver um byte corrompido no fluxo de conteúdo (algo relativamente comum em PDFs gerados por certas bibliotecas), o importador tenta reparar automaticamente antes de extrair o texto, sempre no navegador da pessoa. Textos muito longos (vaga, currículo colado ou extraído do PDF) são limitados a 20.000 caracteres.
 
 Nesta primeira versão a extração de palavras-chave e a reescrita do currículo rodam inteiramente no navegador, com a lista local de termos — sem chamar um modelo de linguagem. O código já está estruturado para trocar essa lógica por uma chamada a uma IA depois, sem precisar redesenhar as telas.
 
@@ -133,16 +133,17 @@ Exportar em .docx, histórico de análises em banco de dados, login com confirma
 
 ## Ajustes e evoluções feitas depois da primeira geração
 
-A primeira geração no Lovable já saiu com as três telas funcionando e passou no teste manual (vaga + currículo de exemplo, 55% de match, palavras-chave corretas, currículo ajustado respeitando a regra). Depois disso, três rodadas de pedidos foram feitas por cima do resultado gerado:
+A primeira geração no Lovable já saiu com as três telas funcionando e passou no teste manual (vaga + currículo de exemplo, 55% de match, palavras-chave corretas, currículo ajustado respeitando a regra). Depois disso, quatro rodadas de pedidos foram feitas por cima do resultado gerado:
 
 1. **Botão da Home não navegava** — "Analisar meu currículo" só dava scroll até a seção de "como funciona" em vez de abrir a tela `/analisar`. Corrigido: a Home ainda não tinha sido publicada com a versão corrigida quando o teste foi feito a primeira vez — o link publicado estava desatualizado em relação ao código.
 2. **Faltava o rodapé com o aviso da regra na Home** — o aviso "o DevMatch ATS nunca inventa experiência..." só aparecia na tela de resultado, não na Home, como o mega prompt pedia. Corrigido adicionando o mesmo aviso fixo no rodapé da Home (arquivo alterado: `src/routes/index.tsx`).
 3. **Importar currículo em PDF** — para não precisar digitar ou colar o texto manualmente, foi adicionado um botão "Importar PDF" ao lado do campo de currículo, que extrai o texto do PDF direto no navegador (sem subir o arquivo a lugar nenhum) e preenche o campo automaticamente.
+4. **Dicionário restrito só a desenvolvimento, e PDF real corrompido não lido corretamente** — testando com uma vaga de Estágio em TI/Suporte (Windows, Active Directory, VPN, Microsoft 365, Intune, PowerShell) e meu currículo real, o match deu 0% porque o dicionário só reconhecia termos de programação. Corrigido ampliando o dicionário para tecnologia em geral (suporte técnico, infraestrutura e redes, produtividade e colaboração, gestão de dispositivos, segurança da informação, dados e BI, automação), com novas categorias na tela de resultado. Separadamente, a seção de certificados do meu currículo saía com texto embaralhado ("Escola DNCIFICADOS") ao importar o PDF — a causa era um byte corrompido dentro do próprio arquivo PDF (confirmado abrindo com outra ferramenta, que mostra o mesmo problema), não um bug de leitura da ordem do texto. Corrigido com uma etapa de reparo automático que detecta e conserta esse tipo de dano antes de extrair o texto, sempre no navegador da pessoa.
 
 ## Stack
 
 - React + TanStack Start, TypeScript, Tailwind CSS, shadcn/ui
-- Leitura e geração de PDF no cliente: `pdfjs-dist` para importar o currículo antigo, `jspdf` para exportar o currículo ajustado
+- Leitura e geração de PDF no cliente: `pdfjs-dist` para importar o currículo antigo (com reparo automático de arquivos levemente corrompidos), `jspdf` para exportar o currículo ajustado
 - Sem backend, banco de dados ou autenticação nesta versão — toda a análise roda na sessão do navegador
 
 ## Segurança
