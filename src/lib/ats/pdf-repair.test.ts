@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { deflateSync } from "node:zlib";
+import { deflateSync, inflateSync } from "node:zlib";
 import { decodeAscii85, repairPdfBytes } from "./pdf-repair";
 
 function encodeAscii85(data: Uint8Array): string {
@@ -37,7 +37,7 @@ describe("PDF stream repair", () => {
     expect(bytes.length).toBe(pdf.length);
     const text = Buffer.from(bytes).toString("latin1");
     const body = text.slice(text.indexOf("stream\n") + 7, text.indexOf("~>") + 2);
-    const inflated = require("node:zlib").inflateSync(Buffer.from(decodeAscii85(Buffer.from(body, "latin1"))));
+    const inflated = inflateSync(Buffer.from(decodeAscii85(Buffer.from(body, "latin1"))));
     expect(inflated.toString()).toBe(content);
   });
 
