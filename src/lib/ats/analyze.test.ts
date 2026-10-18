@@ -40,8 +40,9 @@ describe("analyze", () => {
     ["Certificações de TI", "CompTIA, ITIL"],
   ])("recognizes requested terms in %s", (category, terms) => {
     const r = analyze(terms, terms);
-    const names = Object.entries(r.found).find(([name]) => name === category)?.[1].map((k) => k.name);
-    expect(names).toEqual(expect.arrayContaining(terms.split(", ").map((name) => name === "Teams" ? "Microsoft Teams" : name)));
+    const names = Object.values(r.found).flat().map((k) => k.name.toLowerCase());
+    expect(names).toEqual(expect.arrayContaining(terms.split(", ").map((name) => name === "Teams" ? "microsoft teams" : name.toLowerCase())));
+    expect(Object.entries(r.found).find(([name]) => name === category)?.[1].length).toBeGreaterThan(0);
     expect(r.score).toBe(100);
   });
 

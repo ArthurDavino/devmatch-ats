@@ -76,7 +76,7 @@ export const DICTIONARY: KeywordDef[] = [
   { name: "SQL", category: L, aliases: ["sql", "bancos de dados relacionais", "banco de dados relacional"] },
   { name: "HTML", category: L, aliases: ["html", "html5"] },
   { name: "CSS", category: L, aliases: ["css", "css3"] },
-  { name: "Bash", category: A, aliases: ["bash", "shell script", "shell scripting"] },
+  { name: "Bash", category: L, aliases: ["bash", "shell script", "shell scripting"] },
 
   // Frameworks e bibliotecas
   { name: "React", category: F, aliases: ["react", "react.js", "reactjs"] },
@@ -137,7 +137,7 @@ export const DICTIONARY: KeywordDef[] = [
   { name: "GitLab CI", category: C, aliases: ["gitlab ci", "gitlab-ci"] },
   { name: "Jenkins", category: C, aliases: ["jenkins"] },
   { name: "Git", category: C, aliases: ["git", "github", "gitlab", "bitbucket"] },
-  { name: "Linux", category: I, aliases: ["linux", "ubuntu", "debian", "servidores linux", "linux server"] },
+  { name: "Linux", category: C, aliases: ["linux", "ubuntu", "debian", "servidores linux", "linux server"] },
   { name: "Microsserviços", category: C, aliases: ["microsserviços", "microsservicos", "microservices", "microserviços", "micro serviços"] },
   { name: "Serverless", category: C, aliases: ["serverless", "lambda", "aws lambda", "cloud functions"] },
   { name: "Kafka", category: C, aliases: ["kafka", "apache kafka"] },
@@ -161,14 +161,14 @@ export const DICTIONARY: KeywordDef[] = [
   { name: "APIs REST", category: O, aliases: ["rest", "restful", "api rest", "apis rest", "rest api", "rest apis"] },
   { name: "Testes automatizados", category: O, aliases: ["testes automatizados", "automação de testes", "automacao de testes", "testes unitários", "testes unitarios", "unit tests", "testes de integração"] },
   { name: "Machine Learning", category: O, aliases: ["machine learning", "aprendizado de máquina", "ml"] },
-  { name: "Power BI", category: B, aliases: ["power bi", "powerbi"] },
+  { name: "Power BI", category: O, aliases: ["power bi", "powerbi"] },
   { name: "Figma", category: O, aliases: ["figma"] },
   { name: "Jira", category: O, aliases: ["jira"] },
   { name: "Inglês", category: O, aliases: ["inglês", "ingles", "english"] },
   { name: "Júnior", category: O, aliases: ["júnior", "junior", "jr"] },
   { name: "Pleno", category: O, aliases: ["pleno", "mid-level", "mid level"] },
   { name: "Sênior", category: O, aliases: ["sênior", "senior", "sr"] },
-  { name: "AWS Certified", category: T, aliases: ["aws certified", "certificação aws", "certificacao aws"] },
+  { name: "AWS Certified", category: O, aliases: ["aws certified", "certificação aws", "certificacao aws"] },
 
   // Suporte, sistemas operacionais e redes
   { name: "Windows", category: I, aliases: ["windows", "win10", "win11", "windows 10", "windows 11"] },
