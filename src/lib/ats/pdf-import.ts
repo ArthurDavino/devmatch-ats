@@ -1,11 +1,14 @@
 // Extracts text from a PDF entirely in the browser (file never leaves the device).
 import { orderPdfText, type PdfTextFragment } from "./pdf-layout";
+import { repairPdfBytes } from "./pdf-repair";
 
 export async function extractPdfText(file: File): Promise<string> {
   const pdfjs = await import("pdfjs-dist");
   const workerUrl = (await import("pdfjs-dist/build/pdf.worker.min.mjs?url")).default;
   pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
-  const doc = await pdfjs.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise;
+  const { bytes, fixed } = await repairPdfBytes(new Uint8Array(await file.arrayBuffer()));
+  if (fixed) console.info(`[pdf-import] repaired ${fixed} corrupted byte(s) before reading`);
+  const doc = await pdfjs.getDocument({ data: bytes }).promise;
   try {
     const pages: string[] = [];
     for (let i = 1; i <= doc.numPages; i++) {
