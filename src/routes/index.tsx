@@ -10,6 +10,8 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "Compare seu currículo com a vaga de tecnologia, veja as palavras-chave que faltam e baixe uma versão ajustada para o ATS." },
       { property: "og:title", content: "DevMatch ATS — Seu currículo de tech aprovado pelo ATS" },
       { property: "og:description", content: "Veja o match com a vaga e gere um currículo otimizado, sem inventar experiência." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: Index,
