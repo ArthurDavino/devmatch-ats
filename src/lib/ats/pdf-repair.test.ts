@@ -8,7 +8,7 @@ function encodeAscii85(data: Uint8Array): string {
     const chunk = [...data.subarray(i, i + 4)];
     const n = chunk.length;
     while (chunk.length < 4) chunk.push(0);
-    let v = ((chunk[0] << 24) | (chunk[1] << 16) | (chunk[2] << 8) | chunk[3]) >>> 0;
+    let v = (((chunk[0] ?? 0) << 24) | ((chunk[1] ?? 0) << 16) | ((chunk[2] ?? 0) << 8) | (chunk[3] ?? 0)) >>> 0;
     const digits: string[] = [];
     for (let k = 0; k < 5; k++) {
       digits.unshift(String.fromCharCode((v % 85) + 33));
