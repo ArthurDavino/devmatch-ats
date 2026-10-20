@@ -11,7 +11,7 @@ export async function extractPdfText(file: File): Promise<string> {
   if (fixed) console.info(`[pdf-import] repaired ${fixed} corrupted byte(s) before reading`);
   // Vite owns the only worker entry; PDF.js never resolves another worker URL.
   const port = new PdfWorker();
-  const worker = new pdfjs.PDFWorker({ port });
+  const worker: InstanceType<typeof pdfjs.PDFWorker> = pdfjs.PDFWorker.fromPort({ port });
   const task = pdfjs.getDocument({ data: bytes, worker });
   let timer: ReturnType<typeof setTimeout> | undefined;
   let rejectWorker: ((reason: Error) => void) | undefined;
