@@ -54,13 +54,28 @@ export function decodeAscii85(input: Uint8Array): Uint8Array {
   return new Uint8Array(out);
 }
 
+export function adler32(data: Uint8Array): number {
+  let a = 1;
+  let b = 0;
+  for (let i = 0; i < data.length; i++) {
+    a = (a + (data[i] ?? 0)) % 65521;
+    b = (b + a) % 65521;
+  }
+  return ((b << 16) | a) >>> 0;
+}
+
 async function inflateOk(data: Uint8Array): Promise<boolean> {
+  // Verify the zlib checksum ourselves: some browsers' DecompressionStream
+  // accept damaged data silently, which would let a wrong byte "pass".
+  const n = data.length;
+  if (n < 6) return false;
+  const expected = (((data[n - 4] ?? 0) << 24) | ((data[n - 3] ?? 0) << 16) | ((data[n - 2] ?? 0) << 8) | (data[n - 1] ?? 0)) >>> 0;
   try {
     const body = new Response(data.slice().buffer).body;
     if (!body) return false;
     const stream = body.pipeThrough(new DecompressionStream("deflate"));
-    await new Response(stream).arrayBuffer();
-    return true;
+    const out = new Uint8Array(await new Response(stream).arrayBuffer());
+    return adler32(out) === expected;
   } catch {
     return false;
   }
